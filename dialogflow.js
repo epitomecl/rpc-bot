@@ -3,7 +3,7 @@ module.exports = function(app) {
 	const request = require('request');		
 	const TOKEN = '';
 
-	app.post('/process', (req, res) => {		
+	app.post('/process', (req, res) => {
 	  	const query = req.body.query;
 
 	  	if(!query){
@@ -26,11 +26,26 @@ module.exports = function(app) {
 	    request.get(options, function (error, response, body) {
 	      if (!error) {			     		     	
 	        const objResult = JSON.parse(body);
-	     	res.json({flag: 1, data: objResult.result.parameters});
+	     	// res.json({flag: 1, data: objResult.result.parameters});
+	     	const intentName = objResult.result.metadata.intentName;
+
+	     	if(intentName=='wallet_info'){
+	     		app.getWalletinfo().then((data) => {
+	     			res.json({flag: 1, data: data})
+	     		}).catch((err) =>{
+		      		console.error(err);
+		      		res.json({flag: 0});
+		      	});		      	
+	     	} else {
+	     		console.log(`  No intent matched.`);
+		      	res.json({flag: 0});
+	     	}
+ 
 	      } else {
 	        console.error("e:"+error);
 	      }
 	    });
 	});
+
 
 }
